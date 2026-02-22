@@ -2,63 +2,57 @@ package combat;
 
 import core.Player;
 import core.Enemy;
-import core.GameCharacter;
-
-import java.util.Scanner;
 
 public class BattleSystem {
 
-    private Scanner scanner = new Scanner(System.in);
+    public String performPlayerAttack(Player player,
+                                      Enemy enemy,
+                                      AttackBehavior attack) {
 
-    public void startBattle(Player player, Enemy enemy) {
+        StringBuilder log = new StringBuilder();
 
-        System.out.println("\n⚔️ A wild " + enemy.getName() + " appears!\n");
-
-        while (player.isAlive() && enemy.isAlive()) {
-
-            playerTurn(player, enemy);
-
-            if (enemy.isAlive()) {
-                enemy.attack(player);
-            }
-
-            System.out.println("\n" + player.getName() + " HP: " + player.getHealth());
-            System.out.println(enemy.getName() + " HP: " + enemy.getHealth());
-            System.out.println("----------------------------------");
-        }
-
-        if (player.isAlive()) {
-            System.out.println("🏆 Victory!");
-            player.gainExperience(50);
-        } else {
-            System.out.println("💀 You were defeated...");
-        }
-    }
-
-    private void playerTurn(Player player, GameCharacter enemy) {
-
-        System.out.println("Choose your attack:");
-        System.out.println("1. Melee");
-        System.out.println("2. Magic");
-        System.out.println("3. Ranged");
-
-        int choice = scanner.nextInt();
-
-        AttackBehavior attack;
-
-        switch (choice) {
-            case 2:
-                attack = new MagicAttack();
-                break;
-            case 3:
-                attack = new RangedAttack();
-                break;
-            case 1:
-            default:
-                attack = new MeleeAttack();
-                break;
-        }
-
+        // ===== PLAYER TURN =====
         attack.attack(player, enemy);
+        log.append(player.getName())
+           .append(" attacks ")
+           .append(enemy.getName())
+           .append("!\n");
+
+        log.append(enemy.getName())
+           .append(" HP: ")
+           .append(enemy.getHealth())
+           .append("\n");
+
+        // ===== CHECK ENEMY DEAD =====
+        if (!enemy.isAlive()) {
+            log.append("🎉 Victory!\n");
+
+            player.gainExperience(50);
+
+            log.append("⭐ You gained 50 XP!\n");
+            log.append("Level: ")
+               .append(player.getLevel())
+               .append("\n");
+
+            return log.toString();
+        }
+
+        // ===== ENEMY TURN =====
+        enemy.attack(player);
+
+        log.append(enemy.getName())
+           .append(" attacks back!\n");
+
+        log.append(player.getName())
+           .append(" HP: ")
+           .append(player.getHealth())
+           .append("\n");
+
+        // ===== CHECK PLAYER DEAD =====
+        if (!player.isAlive()) {
+            log.append("💀 You were defeated!\n");
+        }
+
+        return log.toString();
     }
 }
