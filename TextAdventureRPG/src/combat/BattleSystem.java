@@ -2,6 +2,7 @@ package combat;
 
 import core.Player;
 import core.Enemy;
+import model.EnemyType;
 
 public class BattleSystem {
 
@@ -13,6 +14,7 @@ public class BattleSystem {
 
         // ===== PLAYER TURN =====
         attack.attack(player, enemy);
+
         log.append(player.getName())
            .append(" attacks ")
            .append(enemy.getName())
@@ -25,11 +27,20 @@ public class BattleSystem {
 
         // ===== CHECK ENEMY DEAD =====
         if (!enemy.isAlive()) {
+
+            int xpReward = switch (enemy.getType()) {
+                case GOBLIN -> 40;
+                case GOLEM -> 70; 
+                case BOSS -> 150;
+            };
+
+            player.gainExperience(xpReward);
+
             log.append("🎉 Victory!\n");
+            log.append("⭐ Gained ")
+               .append(xpReward)
+               .append(" XP!\n");
 
-            player.gainExperience(50);
-
-            log.append("⭐ You gained 50 XP!\n");
             log.append("Level: ")
                .append(player.getLevel())
                .append("\n");

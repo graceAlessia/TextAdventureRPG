@@ -2,17 +2,18 @@ package core;
 
 import model.HeroType;
 
+
+
 public class Player extends GameCharacter {
 
     private HeroType heroType;
 
-    private int maxHealth;
     private int maxMana;
     private int mana;
-    private int health;
-    private int level;
     private int experience;
 
+    
+    //constructor
     public Player(String name, HeroType heroType) {
         super(name, 100); // temporary value, will override
 
@@ -20,6 +21,7 @@ public class Player extends GameCharacter {
         this.level = 1;
         this.experience = 0;
 
+        // hero base stats 
         switch (heroType) {
 
             case WARRIOR:
@@ -38,11 +40,14 @@ public class Player extends GameCharacter {
                 break;
         }
 
-        // Set actual values
+        // Set starting values
         setHealth(maxHealth);
         mana = maxMana;
     }
 
+    
+    
+    //getters 
     public HeroType getHeroType() {
         return heroType;
     }
@@ -58,19 +63,26 @@ public class Player extends GameCharacter {
     public int getMaxMana() {
         return maxMana;
     }
-
-    public int getLevel() {
-        return level;
+    
+    public int getExperience() {
+        return experience;
     }
 
-    public void setLevel(int level) {
-        this.level = level;
-    }
 
+//    public int getLevel() {
+//        return level;
+//    }
+
+//    public void setLevel(int level) {
+//        this.level = level;
+//    }
+
+    //to restore hero after switching 
     public void setExperience(int experience) {
         this.experience = experience;
     }
 
+    //spend-mana 
     public boolean useMana(int amount) {
         if (mana >= amount) {
             mana -= amount;
@@ -91,26 +103,39 @@ public class Player extends GameCharacter {
 
         experience += xp;
 
-        while (experience >= 100) {
-            experience -= 100;
-            level++;
+        while (experience >= getRequiredXP()) {
+            experience -= getRequiredXP();
+            levelUp();
 
-            // Optional: Increase stats on level up
-            maxHealth += 20;
-            health = maxHealth;
-
-            maxMana += 10;
-            mana = maxMana;
-
-            System.out.println("LEVEL UP! Now Level " + level);
+//            maxHealth += 20;
+//            health = maxHealth;
+//
+//            maxMana += 10;
+//            mana = maxMana;
+//
+//            System.out.println("🔥 LEVEL UP! Now Level " + level);
         }
     }
+    
+    
+    //XP calling formula
+    public int getRequiredXP() {
+    	return 100 * level;
+    }
 
+    /*
+     * What happens when leveling up:
+     * - Level increases
+     * - Max HP increases
+     * - Max Mana increases
+     * - Fully heal
+     * - Fully restore mana
+     */
+    
     private void levelUp() {
         level++;
-
         maxHealth += 25;
-        maxMana += 15;
+        maxMana += 25;
 
         setHealth(maxHealth);
         mana = maxMana;
@@ -118,10 +143,7 @@ public class Player extends GameCharacter {
         System.out.println("Level up! Now level " + level);
     }
     
-    public int getExperience() {
-        return experience;
-    }
-
+   
     @Override
     public void attack(GameCharacter target) {
         // handled by BattleSystem

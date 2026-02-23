@@ -15,6 +15,7 @@ public class Enemy extends GameCharacter {
         this.enemyType = type;
         this.attackBehavior = attackBehavior;
 
+        // Set stats based on enemy type
         switch (enemyType) {
             case GOBLIN:
                 this.maxHealth = 90;

@@ -19,16 +19,16 @@ public class BattleGUI extends JFrame {
     private JProgressBar enemyHpBar;
     private JProgressBar playerManaBar;
     private JProgressBar playerXpBar;
+
     private JLabel playerLabel;
     private JLabel enemyLabel;
 
     private JButton meleeButton;
     private JButton magicButton;
     private JButton rangedButton;
-    
     private JButton restartButton;
     private JButton exitButton;
-    
+
     private JPanel topPanel;
 
     public BattleGUI() {
@@ -39,9 +39,8 @@ public class BattleGUI extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(15, 15));
         getContentPane().setBackground(new Color(30, 30, 30));
-        
 
-        // ===== Player Setup =====
+        // ===== PLAYER SETUP =====
         String playerName = JOptionPane.showInputDialog(this, "Enter your hero name:");
         if (playerName == null || playerName.isBlank()) playerName = "Hero";
 
@@ -61,27 +60,23 @@ public class BattleGUI extends JFrame {
         enemy = new Enemy("Goblin", EnemyType.GOBLIN, new MeleeAttack());
         battleSystem = new BattleSystem();
 
-        // ================= TOP PANEL =================
+        // ===== TOP PANEL =====
         topPanel = new JPanel(new GridLayout(4, 2, 10, 10));
         topPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         topPanel.setBackground(new Color(45, 45, 45));
 
-       // JLabel playerLabel = new JLabel(player.getName() + " (" + player.getHeroType() + ")");
-        playerLabel = new JLabel(player.getName() + " ( " + player.getHeroType() + " )");
+        playerLabel = new JLabel(player.getName() + " (" + player.getHeroType() + ")");
         playerLabel.setForeground(Color.WHITE);
 
         playerHpBar = new JProgressBar(0, player.getMaxHealth());
-        playerHpBar.setValue(player.getHealth());
         playerHpBar.setStringPainted(true);
         playerHpBar.setForeground(new Color(46, 204, 113));
 
         playerManaBar = new JProgressBar(0, player.getMaxMana());
-        playerManaBar.setValue(player.getMana());
         playerManaBar.setStringPainted(true);
         playerManaBar.setForeground(new Color(52, 152, 219));
 
-        playerXpBar = new JProgressBar(0, 100);
-        playerXpBar.setValue(player.getExperience());
+        playerXpBar = new JProgressBar(0, player.getRequiredXP());
         playerXpBar.setStringPainted(true);
         playerXpBar.setForeground(new Color(155, 89, 182));
 
@@ -89,31 +84,31 @@ public class BattleGUI extends JFrame {
         enemyLabel.setForeground(Color.WHITE);
 
         enemyHpBar = new JProgressBar(0, enemy.getMaxHealth());
-        enemyHpBar.setValue(enemy.getHealth());
         enemyHpBar.setStringPainted(true);
         enemyHpBar.setForeground(new Color(231, 76, 60));
 
         topPanel.add(playerLabel);
         topPanel.add(playerHpBar);
+//        topPanel.add(new JLabel("Mana"));
+//        topPanel.add(playerManaBar);
+//        topPanel.add(new JLabel("Experience"));
+//        topPanel.add(playerXpBar)
+        JLabel manaLabel = new JLabel("Mana");
+        manaLabel.setForeground(Color.WHITE);
 
-       /* if (player.getHeroType() == HeroType.MAGE) {
-            topPanel.add(new JLabel("Mana"));
-            topPanel.add(playerManaBar);
-        } else {
-            topPanel.add(new JLabel(""));
-            topPanel.add(new JLabel(""));
-        }*/
-        topPanel.add(new JLabel("Mana"));
+        JLabel xpLabel = new JLabel("Experience");
+        xpLabel.setForeground(Color.WHITE);
+
+        topPanel.add(manaLabel);
         topPanel.add(playerManaBar);
-
-        topPanel.add(new JLabel("Experience"));
+        topPanel.add(xpLabel);
         topPanel.add(playerXpBar);
         topPanel.add(enemyLabel);
         topPanel.add(enemyHpBar);
 
         add(topPanel, BorderLayout.NORTH);
 
-        // ================= CENTER LOG =================
+        // ===== CENTER LOG =====
         JTextArea battleLog = new JTextArea();
         battleLog.setEditable(false);
         battleLog.setFont(new Font("Monospaced", Font.PLAIN, 14));
@@ -122,7 +117,7 @@ public class BattleGUI extends JFrame {
 
         add(new JScrollPane(battleLog), BorderLayout.CENTER);
 
-        // ================= BOTTOM PANEL =================
+        // ===== BOTTOM PANEL =====
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBackground(new Color(45, 45, 45));
 
@@ -130,20 +125,19 @@ public class BattleGUI extends JFrame {
         magicButton = new JButton("Magic");
         rangedButton = new JButton("Ranged");
         restartButton = new JButton("Play Again");
-    	exitButton = new JButton("Exit");
-    	
-    	restartButton.setVisible(false);
-    	exitButton.setVisible(false);
-    	
-    	restartButton.addActionListener(e -> restartGame());
-        exitButton.addActionListener(e -> System.exit(0)); // can also use dispose();
-    	
+        exitButton = new JButton("Exit");
+
+        restartButton.setVisible(false);
+        exitButton.setVisible(false);
+
+        restartButton.addActionListener(e -> restartGame());
+        exitButton.addActionListener(e -> System.exit(0));
 
         bottomPanel.add(meleeButton);
         bottomPanel.add(magicButton);
         bottomPanel.add(rangedButton);
         bottomPanel.add(restartButton);
-    	bottomPanel.add(exitButton);
+        bottomPanel.add(exitButton);
 
         add(bottomPanel, BorderLayout.SOUTH);
 
@@ -158,32 +152,18 @@ public class BattleGUI extends JFrame {
 
         updateBars();
         setVisible(true);
-       
-    	
     }
-    
-    	
-    
-  
 
-    // ================= ATTACK HANDLER =================
+    // ================= ATTACK =================
     private void handleAttack(AttackBehavior attack, JTextArea battleLog) {
 
         String result = battleSystem.performPlayerAttack(player, enemy, attack);
         battleLog.append(result + "\n");
 
         updateBars();
-        //Display Manabar for mage
-        if (player.getHeroType() == HeroType.MAGE) {
-            playerManaBar.setVisible(true);
-        } else {
-            playerManaBar.setVisible(false);
-        }
-        //playerManaBar.setEnabled(player.getHeroType() == HeroType.MAGE);
 
         // PLAYER DEAD
         if (!player.isAlive()) {
-            battleLog.append("\n💀 You were defeated!\n");
             disableButtons();
             restartButton.setVisible(true);
             exitButton.setVisible(true);
@@ -192,30 +172,23 @@ public class BattleGUI extends JFrame {
 
         // ENEMY DEAD
         if (!enemy.isAlive()) {
-
-            int xpReward;
-
-            if (enemy.getType() == EnemyType.GOBLIN) {
-                xpReward = 40;
-            } else if (enemy.getType() == EnemyType.GOLEM) {
-                xpReward = 70;
-            } else {
-                xpReward = 150;
-            }
+/*
+            int xpReward = switch (enemy.getType()) {
+                case GOBLIN -> 40;
+                case GOLEM -> 70;
+                default -> 150;
+            };
 
             player.gainExperience(xpReward);
-
-            playerXpBar.setMaximum(100);
-            playerXpBar.setValue(player.getExperience());
-            playerXpBar.setString("XP: " + player.getExperience() + " / 100");
 
             battleLog.append("⭐ Gained " + xpReward + " XP!\n");
             battleLog.append("Level: " + player.getLevel() + "\n");
 
-            // Boss defeated
+            playerXpBar.setValue(player.getExperience());
+            playerXpBar.setString("XP: " + player.getExperience() + " / 100");*/
+
             if (enemy.getType() == EnemyType.BOSS) {
                 battleLog.append("\n🏆 YOU DEFEATED THE FINAL BOSS!\n");
-                battleLog.append("🎉 GAME COMPLETED!\n");
                 disableButtons();
                 restartButton.setVisible(true);
                 exitButton.setVisible(true);
@@ -223,11 +196,7 @@ public class BattleGUI extends JFrame {
             }
 
             chooseNewHero();
-            
-            topPanel.revalidate();
-            topPanel.repaint();
 
-            // Spawn next enemy
             if (player.getLevel() >= 3) {
                 enemy = new Enemy("Boss", EnemyType.BOSS, new MeleeAttack());
                 battleLog.append("\n🔥 The FINAL BOSS appears!\n");
@@ -238,31 +207,36 @@ public class BattleGUI extends JFrame {
 
             enemyLabel.setText("Enemy: " + enemy.getName());
             enemyHpBar.setMaximum(enemy.getMaxHealth());
-            enemyHpBar.setValue(enemy.getHealth());
 
-            enemyHpBar.setString("HP: " + enemy.getHealth()	 + " / " + enemy.getMaxHealth()); 
+            updateBars();
             enableButtons();
         }
     }
 
-    
-    //============= Update Bar =======================
+    // ================= UPDATE UI =================
     private void updateBars() {
+
+        playerHpBar.setMaximum(player.getMaxHealth());
         playerHpBar.setValue(player.getHealth());
         playerHpBar.setString("HP: " + player.getHealth() + " / " + player.getMaxHealth());
 
+        playerManaBar.setMaximum(player.getMaxMana());
         playerManaBar.setValue(player.getMana());
         playerManaBar.setString("Mana: " + player.getMana());
 
+       // playerXpBar.setValue(player.getExperience());
+        playerXpBar.setMaximum(player.getRequiredXP());
+        playerXpBar.setValue(player.getExperience());
+        playerXpBar.setString("XP: " + player.getExperience() 
+            + " / " + player.getRequiredXP());
+
         enemyHpBar.setValue(enemy.getHealth());
         enemyHpBar.setString("HP: " + enemy.getHealth() + " / " + enemy.getMaxHealth());
-   
-        if (player.getHeroType() == HeroType.MAGE) {
-            playerManaBar.setVisible(true);
-        } else {
-            playerManaBar.setVisible(false);
-        }
-    
+
+        // Show mana only for Mage
+        playerManaBar.setVisible(player.getHeroType() == HeroType.MAGE);
+
+        playerLabel.setText(player.getName() + " (" + player.getHeroType() + ")");
     }
 
     private void disableButtons() {
@@ -278,6 +252,31 @@ public class BattleGUI extends JFrame {
     }
 
     // ================= HERO SWITCH =================
+   /* private void chooseNewHero() {
+
+        HeroType newType = (HeroType) JOptionPane.showInputDialog(
+                this,
+                "Choose your new hero type:",
+                "Hero Change",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                HeroType.values(),
+                player.getHeroType()
+        );
+
+        if (newType != null) {
+
+            int level = player.getLevel();
+            int xp = player.getExperience();
+            String name = player.getName();
+
+            player = new Player(name, newType);
+            player.setLevel(level);
+            player.setExperience(xp);
+
+            updateBars();
+        }
+    }*/
     private void chooseNewHero() {
 
         HeroType newType = (HeroType) JOptionPane.showInputDialog(
@@ -288,75 +287,41 @@ public class BattleGUI extends JFrame {
                 null,
                 HeroType.values(),
                 player.getHeroType()
-                
         );
 
         if (newType != null) {
 
-            int currentLevel = player.getLevel();
-            int currentXP = player.getExperience();
+            int oldLevel = player.getLevel();
+            int oldXP = player.getExperience();
             String name = player.getName();
 
-            player = new Player(name, newType);
+            Player newPlayer = new Player(name, newType);
 
-            player.setLevel(currentLevel);
-            player.setExperience(currentXP);
+            // restore level properly
+            for (int i = 1; i < oldLevel; i++) {
+                newPlayer.gainExperience(newPlayer.getRequiredXP());
+            }
 
-//            playerHpBar.setMaximum(player.getMaxHealth());
-//            updateBars();
-        
-            playerHpBar.setMaximum(player.getMaxHealth());
-            playerHpBar.setValue(player.getHealth());
-            playerHpBar.setString("HP: " + player.getHealth() + " / " + player.getMaxHealth());
-            
-            playerManaBar.setMaximum(player.getMaxMana());
-            playerManaBar.setValue(player.getMana());
-            playerManaBar.setString("Mana: " + player.getMana());
-            
-            playerXpBar.setValue(player.getExperience());
-            playerXpBar.setString("XP: " + player.getExperience() + " / 100");
-            
-            playerLabel.setText(player.getName() + " (" + player.getHeroType() + ")");
-            
-            
+            newPlayer.setExperience(oldXP);
+
+            player = newPlayer;
+
+            updateBars();
         }
-        if (player.getHeroType() == HeroType.MAGE) {
-            playerManaBar.setVisible(true);
-        } else {
-            playerManaBar.setVisible(false);
-        }
-        
-        
     }
-    
-    
-    //restartGame() Method
-    
+
+    // ================= RESTART =================
     private void restartGame() {
-    	// Reset player completely
-    	player = new Player(player.getName(), player.getHeroType());
-    	
-    	//Reset enemy to Goblin
-    	enemy = new Enemy("Goblin", EnemyType.GOBLIN, new MeleeAttack());
-    	
-    	enemyLabel.setText("Enemy: " + enemy.getName());
-    	
-    	//Reset bars
-    	playerHpBar.setMaximum(player.getMaxHealth());
-    	playerManaBar.setMaximum(player.getMaxMana());
-    	playerXpBar.setValue(0);
-    	playerXpBar.setString("XP: 0 / 100");
-    	enemyHpBar.setMaximum(enemy.getMaxHealth());
-    	
-    	updateBars();
-    	
-    	//Enable attack Buttons
-    	enableButtons();
-    	
-    	//Hide restart/exit
-    	restartButton.setVisible(false);
-    	exitButton.setVisible(false);
-    
+
+        player = new Player(player.getName(), player.getHeroType());
+        enemy = new Enemy("Goblin", EnemyType.GOBLIN, new MeleeAttack());
+
+        enemyLabel.setText("Enemy: " + enemy.getName());
+
+        updateBars();
+
+        enableButtons();
+        restartButton.setVisible(false);
+        exitButton.setVisible(false);
     }
-    
 }
